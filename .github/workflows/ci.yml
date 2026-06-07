@@ -1,0 +1,66 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run seed and verify
+        run: |
+          python seed.py
+          echo "Seed completed successfully"
+
+      - name: Start server and test endpoints
+        run: |
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+          
+          echo "Testing health check..."
+          curl -f http://localhost:8000/
+          
+          echo "Testing create cart..."
+          curl -f -X POST http://localhost:8000/carts/ -H "Content-Type: application/json" -d '{"cust_id": 1}'
+          
+          echo "Testing get cart..."
+          curl -f http://localhost:8000/carts/1
+          
+          echo "Testing add items..."
+          curl -f -X POST http://localhost:8000/carts/1/items -H "Content-Type: application/json" -d '{"items": [{"prod_id": 1, "quantity": 2}, {"prod_id": 3}]}'
+          
+          echo "Testing checkout..."
+          curl -f -X PATCH http://localhost:8000/carts/1/checkout
+          
+          echo "Testing delete cart..."
+          curl -f -X DELETE http://localhost:8000/carts/1
+          
+          echo "All endpoint tests passed!"
+
+      - name: Build Docker image
+        run: docker build -t shopping-cart-api .
+
+      - name: Run Docker container and test
+        run: |
+          docker run -d -p 9000:8000 --name test-container shopping-cart-api
+          sleep 5
+          curl -f http://localhost:9000/
+          echo "Docker container test passed!"
+          docker stop test-container
