@@ -1,13 +1,48 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from app.database import engine, Base
 from app import models
 from app.routes.cart import router as cart_router
+from app.exceptions import AppException
+from app.logger import logger
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Shopping Cart API")
 
+
+@app.exception_handler(AppException)
+def app_exception_handler(request: Request, exc: AppException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.message},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+def validation_exception_handler(request: Request, exc: RequestValidationError):
+    messages = []
+    for error in exc.errors():
+        field = " -> ".join(str(loc) for loc in error["loc"])
+        messages.append(f"{field}: {error['msg']}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": messages},
+    )
+
+
+@app.exception_handler(Exception)
+def general_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unexpected error: {str(exc)}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected error occurred"},
+    )
+
+
 app.include_router(cart_router)
+
 
 @app.get("/")
 def root():
