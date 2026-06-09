@@ -35,10 +35,11 @@ jobs:
         run: |
           pytest tests/test_cart.py -v
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v6
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # Temporarily disabled to prevent conflict with Automatic Analysis
+      # - name: SonarCloud Scan
+      #   uses: SonarSource/sonarqube-scan-action@v6
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Run seed and verify
         run: |
