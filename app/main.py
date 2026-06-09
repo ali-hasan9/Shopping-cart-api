@@ -43,6 +43,32 @@ def general_exception_handler(request: Request, exc: Exception):
 
 app.include_router(cart_router)
 
+@app.post("/seed")
+def seed_data():
+    from app.database import SessionLocal
+    from app.models import Customer, Category, Product
+
+    db = SessionLocal()
+    try:
+        if db.query(Customer).first():
+            return {"message": "Already seeded"}
+
+        db.add_all([Customer(name="Ali"), Customer(name="Ahmed")])
+        db.commit()
+
+        db.add_all([Category(name="Electronics"), Category(name="Clothing")])
+        db.commit()
+
+        db.add_all([
+            Product(name="Laptop", price=999.99, category_id=1),
+            Product(name="Mouse", price=29.99, category_id=1),
+            Product(name="T-Shirt", price=19.99, discount_price=14.99, category_id=2),
+            Product(name="Jeans", price=49.99, category_id=2),
+        ])
+        db.commit()
+        return {"message": "Seeded"}
+    finally:
+        db.close()
 
 @app.get("/")
 def root():
