@@ -21,6 +21,8 @@ from app.exceptions import AppException
 from app.logger import logger
 
 router = APIRouter(prefix="/carts", tags=["Cart"])
+
+
 @router.post("/", response_model=CartResponse, status_code=201)
 def create_cart_endpoint(cart_data: CartCreate, db: Session = Depends(get_db)):
     try:
@@ -32,7 +34,7 @@ def create_cart_endpoint(cart_data: CartCreate, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Unexpected error while creating cart: {str(e)}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
-    
+
 
 @router.get("/{cartId}", response_model=CartResponse)
 def get_cart_endpoint(cartId: int, db: Session = Depends(get_db)):
@@ -45,7 +47,8 @@ def get_cart_endpoint(cartId: int, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Unexpected error while fetching cart: {str(e)}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
-    
+
+
 @router.post("/{cartId}/items", response_model=CartResponse, status_code=201)
 def add_items_endpoint(
     cartId: int, items_data: AddItemsRequest, db: Session = Depends(get_db)
@@ -59,7 +62,8 @@ def add_items_endpoint(
     except Exception as e:
         logger.error(f"Unexpected error while adding items: {str(e)}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
-    
+
+
 @router.delete("/{cartId}/items", response_model=CartResponse)
 def remove_items_endpoint(
     cartId: int, remove_data: RemoveItemsRequest, db: Session = Depends(get_db)
@@ -73,7 +77,7 @@ def remove_items_endpoint(
     except Exception as e:
         logger.error(f"Unexpected error while removing items: {str(e)}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
-    
+
 
 @router.patch("/{cartId}/checkout", response_model=CheckoutResponse)
 def checkout_cart_endpoint(cartId: int, db: Session = Depends(get_db)):
@@ -86,7 +90,7 @@ def checkout_cart_endpoint(cartId: int, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Unexpected error while checking out cart: {str(e)}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
-    
+
 
 @router.delete("/{cartId}", status_code=200)
 def delete_cart_endpoint(cartId: int, db: Session = Depends(get_db)):

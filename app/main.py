@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from app.database import engine, Base
-from app import models
+from app import models  # noqa: F401
 from app.routes.cart import router as cart_router
 from app.exceptions import AppException
 from app.logger import logger
@@ -43,6 +43,7 @@ def general_exception_handler(request: Request, exc: Exception):
 
 app.include_router(cart_router)
 
+
 @app.post("/seed")
 def seed_data():
     from app.database import SessionLocal
@@ -69,6 +70,7 @@ def seed_data():
         return {"message": "Seeded"}
     finally:
         db.close()
+
 
 @app.get("/")
 def root():
