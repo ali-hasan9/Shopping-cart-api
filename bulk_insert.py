@@ -1,20 +1,28 @@
 import time
 import random
 import string
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.database import Base
 from app.models import Customer, Category, Product, Cart, CartItem, Wishlist
 
-RDS_URL = "postgresql://postgres:takeitgiveit987@shopping-cart-db.c52e48g2o03l.ap-south-1.rds.amazonaws.com:5432/postgres"
+RDS_URL = os.environ.get("RDS_URL")
+
+if not RDS_URL:
+    print("ERROR: Set RDS_URL environment variable first")
+    print('Example: set RDS_URL=postgresql://postgres:yourpass@your-endpoint:5432/postgres')
+    exit(1)
+
 engine = create_engine(RDS_URL)
-Base.metadata.create_all(bind=engine)
-SessionLocal = sessionmaker(bind=engine)
-db = SessionLocal()
+
 print("Dropping all existing tables...")
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 print("Tables recreated\n")
+
+SessionLocal = sessionmaker(bind=engine)
+db = SessionLocal()
 BATCH_SIZE = 5000
 TOTAL_CUSTOMERS = 100000
 TOTAL_PRODUCTS = 50000
