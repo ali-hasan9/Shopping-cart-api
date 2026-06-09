@@ -2,7 +2,7 @@ import logging
 import os
 
 
-os.makedirs("logs", exist_ok = True)
+os.makedirs("logs", exist_ok=True)
 logger = logging.getLogger("shopping_cart")
 logger.setLevel(logging.DEBUG)
 

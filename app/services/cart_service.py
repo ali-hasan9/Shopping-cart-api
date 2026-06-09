@@ -9,13 +9,15 @@ from app.exceptions import (
 )
 from app.logger import logger
 
+
 def _validate_customer(db: Session, cust_id: int):
     customer = db.query(Customer).filter(Customer.id == cust_id).first()
     if not customer:
         raise NotFoundException("Customer", cust_id)
     return customer
 
-def _validate_cart(db:Session, cart_id:int, check_status: bool = True):
+
+def _validate_cart(db: Session, cart_id: int, check_status: bool = True):
     cart = db.query(Cart).filter(Cart.id == cart_id).first()
     if not cart:
         raise NotFoundException("Cart", cart_id)
@@ -23,22 +25,23 @@ def _validate_cart(db:Session, cart_id:int, check_status: bool = True):
         raise CartAlreadyCheckedOutException(cart_id)
     return cart
 
+
 def create_cart(db: Session, cart_data: CartCreate):
-     logger.info(f"Creating cart for customer {cart_data.cust_id}")
-     _validate_customer(db, cart_data.cust_id)
-     new_cart = Cart(
-        cust_id = cart_data.cust_id,
+    logger.info(f"Creating cart for customer {cart_data.cust_id}")
+    _validate_customer(db, cart_data.cust_id)
+    new_cart = Cart(
+        cust_id=cart_data.cust_id,
         coupon_code=cart_data.coupon_code,
         discount_amount=cart_data.discount_amount,
-     )
-     db.add(new_cart)
-     db.commit()
-     db.refresh(new_cart)
-     logger.info(f"Cart created with id {new_cart.id}")
-     return new_cart
+    )
+    db.add(new_cart)
+    db.commit()
+    db.refresh(new_cart)
+    logger.info(f"Cart created with id {new_cart.id}")
+    return new_cart
 
 
-def get_cart(db:Session, cart_id:int):
+def get_cart(db: Session, cart_id: int):
     logger.info(f"Fetching cart {cart_id}")
     cart = _validate_cart(db, cart_id, check_status=False)
     return cart
@@ -82,6 +85,7 @@ def add_items_to_cart(db: Session, cart_id: int, items_data: AddItemsRequest):
     db.refresh(cart)
     return cart
 
+
 def remove_items_from_cart(db: Session, cart_id: int, remove_data: RemoveItemsRequest):
     logger.info(f"Removing {len(remove_data.item_ids)} items from cart {cart_id}")
 
@@ -105,6 +109,7 @@ def remove_items_from_cart(db: Session, cart_id: int, remove_data: RemoveItemsRe
     db.refresh(cart)
     return cart
 
+
 def checkout_cart(db: Session, cart_id: int):
     logger.info(f"Checking out cart {cart_id}")
 
@@ -125,6 +130,7 @@ def checkout_cart(db: Session, cart_id: int):
         "status": cart.status,
         "message": "Cart checked out successfully",
     }
+
 
 def delete_cart(db: Session, cart_id: int):
     logger.info(f"Deleting cart {cart_id}")

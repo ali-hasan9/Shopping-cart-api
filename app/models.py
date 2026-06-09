@@ -32,7 +32,7 @@ class Product(Base):
     name = Column(String(150), nullable=False)
     price = Column(Float, nullable=False)
     discount_price = Column(Float, nullable=True)
-    
+
     category = relationship("Category", back_populates="products")
 
 
@@ -45,7 +45,6 @@ class Cart(Base):
     coupon_code = Column(String(50), nullable=True)
     discount_amount = Column(Float, default=0.0)
     status = Column(String(20), default="active")
-
 
     customer = relationship("Customer", back_populates="carts")
     items = relationship(
