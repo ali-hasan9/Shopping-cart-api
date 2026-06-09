@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   build-and-test:
@@ -24,6 +24,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run unit tests
+        run: |
+          pytest tests/test_cart.py -v
+
       - name: Run seed and verify
         run: |
           python seed.py
@@ -33,25 +37,25 @@ jobs:
         run: |
           uvicorn app.main:app --host 0.0.0.0 --port 8000 &
           sleep 5
-          
+
           echo "Testing health check..."
           curl -f http://localhost:8000/
-          
+
           echo "Testing create cart..."
           curl -f -X POST http://localhost:8000/carts/ -H "Content-Type: application/json" -d '{"cust_id": 1}'
-          
+
           echo "Testing get cart..."
           curl -f http://localhost:8000/carts/1
-          
+
           echo "Testing add items..."
           curl -f -X POST http://localhost:8000/carts/1/items -H "Content-Type: application/json" -d '{"items": [{"prod_id": 1, "quantity": 2}, {"prod_id": 3}]}'
-          
+
           echo "Testing checkout..."
           curl -f -X PATCH http://localhost:8000/carts/1/checkout
-          
+
           echo "Testing delete cart..."
           curl -f -X DELETE http://localhost:8000/carts/1
-          
+
           echo "All endpoint tests passed!"
 
       - name: Build Docker image
